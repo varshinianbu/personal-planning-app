@@ -4,8 +4,8 @@ PlanPilot is a personal planning app built in Jac. It keeps a shared task list t
 
 ## Author
 
-Varshini Nainani
-UMID: 12345678
+Vijayavarshini Anbu
+UMID: 94826214
 
 ## Features
 
