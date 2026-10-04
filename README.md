@@ -2,13 +2,8 @@
 
 ## Author
 
-<<<<<<< HEAD
 Vijayavarshini Anbu
 UMID: 94826214
-=======
-Name: Varshini Anbu
-UMID: TODO
->>>>>>> 391d6d0 (Finalize PlanPilot submission)
 
 ## Description
 
@@ -81,20 +76,3 @@ All four interfaces consume the shared task service in `core/planner_service.jac
 ## Smart Prioritization
 
 PlanPilot calculates a deterministic focus score from task priority, due date urgency, and overdue status. Completed tasks are excluded from recommendations, and the highest-scoring active task becomes the next recommended item.
-
-## What Makes PlanPilot Stand Out
-
-- Cohesive cross-platform planning with one shared source of truth
-- Persistent task storage without an external database
-- Polished paper-planner web design preserved from the current implementation
-- Purpose-built mobile workflow for quick task triage
-- Useful CLI commands for day-to-day planning
-- Deterministic recommendations instead of opaque AI scoring
-
-## Screenshots
-
-### Web
-[Add screenshot here]
-
-### Mobile
-[Add screenshot here]
