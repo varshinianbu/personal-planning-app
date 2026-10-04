@@ -31,7 +31,15 @@ test "add command parses task metadata" {
     assert inv.priority == "high";
 }
 
-test "done and remove pass through task ids" {
+test "complete, delete, done, and remove pass through task ids" {
+    complete_inv = parse_args(["complete", "abc-123"]);
+    assert complete_inv.command == "complete";
+    assert complete_inv.task_id == "abc-123";
+
+    delete_inv = parse_args(["delete", "xyz-999"]);
+    assert delete_inv.command == "delete";
+    assert delete_inv.task_id == "xyz-999";
+
     done_inv = parse_args(["done", "abc-123"]);
     assert done_inv.command == "done";
     assert done_inv.task_id == "abc-123";
@@ -41,7 +49,13 @@ test "done and remove pass through task ids" {
     assert remove_inv.task_id == "xyz-999";
 }
 
-test "summary and unknown commands are accepted as plain commands" {
+test "today stats summary and unknown commands are accepted as plain commands" {
+    today_inv = parse_args(["today"]);
+    assert today_inv.command == "today";
+
+    stats_inv = parse_args(["stats"]);
+    assert stats_inv.command == "stats";
+
     sum_inv = parse_args(["summary"]);
     assert sum_inv.command == "summary";
 

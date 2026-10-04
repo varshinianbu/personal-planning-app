@@ -1,6 +1,7 @@
 import from core.planner_service {
     add_task,
     clear_completed,
+    get_next_task,
     get_summary,
     get_tasks,
     remove_task,
@@ -13,6 +14,8 @@ def:pub page -> JsxPage {
         due: str = "",
         category: str = "Coursework",
         priority: str = "medium",
+        next_task: dict[str, any] | None = None,
+        error_message: str = "",
         tasks: list[dict[str, any]] = [],
         summary: dict[str, any] = {
             "total": 0,
@@ -30,10 +33,12 @@ def:pub page -> JsxPage {
     async def refresh() {
         tasks = await get_tasks();
         summary = await get_summary();
+        next_task = await get_next_task();
     }
 
     async def submit_task() {
         if title.strip() == "" {
+            error_message = "Title is required.";
             return;
         }
         await add_task(
@@ -48,6 +53,7 @@ def:pub page -> JsxPage {
         due = "";
         category = "Coursework";
         priority = "medium";
+        error_message = "";
         await refresh();
     }
 
@@ -101,7 +107,7 @@ def:pub page -> JsxPage {
                                 type="text"
                                 placeholder="title"
                                 value={title}
-                                onChange={lambda (e: ChangeEvent) { title = e.target.value; }}
+                                onChange={lambda (e: ChangeEvent) { title = e.target.value; error_message = ""; }}
                                 style={{"width": "100%", "padding": "14px 16px", "borderRadius": "22px", "border": "2px solid #262626", "fontSize": "18px", "background": "#fffef9", "boxSizing": "border-box", "boxShadow": "inset 0 1px 0 rgba(255,255,255,0.72)"}}
                             />
                         </div>
@@ -112,7 +118,7 @@ def:pub page -> JsxPage {
                                 <input
                                     type="date"
                                     value={due}
-                                    onChange={lambda (e: ChangeEvent) { due = e.target.value; }}
+                                    onChange={lambda (e: ChangeEvent) { due = e.target.value; error_message = ""; }}
                                     style={{"width": "100%", "padding": "13px 14px", "borderRadius": "22px", "border": "2px solid #262626", "fontSize": "15px", "background": "#fffef9", "boxSizing": "border-box"}}
                                 />
                             </div>
@@ -120,7 +126,7 @@ def:pub page -> JsxPage {
                                 <label style={{"display": "block", "marginBottom": "7px", "fontSize": "11px", "fontWeight": "700", "color": "#6c7f8b", "letterSpacing": "0.18em", "textTransform": "uppercase"}}>Category</label>
                                 <select
                                     value={category}
-                                    onChange={lambda (e: ChangeEvent) { category = e.target.value; }}
+                                    onChange={lambda (e: ChangeEvent) { category = e.target.value; error_message = ""; }}
                                     style={{"width": "100%", "padding": "13px 14px", "borderRadius": "22px", "border": "2px solid #262626", "fontSize": "15px", "background": "#fffef9", "boxSizing": "border-box"}}
                                 >
                                     <option value="Coursework">Coursework</option>
@@ -136,7 +142,7 @@ def:pub page -> JsxPage {
                             <textarea
                                 placeholder="sketch the thought here..."
                                 value={notes}
-                                onChange={lambda (e: ChangeEvent) { notes = e.target.value; }}
+                                onChange={lambda (e: ChangeEvent) { notes = e.target.value; error_message = ""; }}
                                 rows={6}
                                 style={{"width": "100%", "padding": "15px 16px", "borderRadius": "26px", "border": "2px solid #262626", "fontSize": "15px", "background": "radial-gradient(circle at 1px 1px, rgba(38,38,38,0.09) 1px, transparent 0)", "backgroundSize": "12px 12px", "resize": "vertical", "boxSizing": "border-box", "lineHeight": "1.55"}}
                             ></textarea>
@@ -146,7 +152,7 @@ def:pub page -> JsxPage {
                             <label style={{"display": "block", "marginBottom": "7px", "fontSize": "11px", "fontWeight": "700", "color": "#6c7f8b", "letterSpacing": "0.18em", "textTransform": "uppercase"}}>Priority</label>
                             <select
                                 value={priority}
-                                onChange={lambda (e: ChangeEvent) { priority = e.target.value; }}
+                                onChange={lambda (e: ChangeEvent) { priority = e.target.value; error_message = ""; }}
                                 style={{"width": "100%", "padding": "13px 14px", "borderRadius": "22px", "border": "2px solid #262626", "fontSize": "15px", "background": "#fffef9", "boxSizing": "border-box"}}
                             >
                                 <option value="high">High priority</option>
@@ -158,6 +164,11 @@ def:pub page -> JsxPage {
                         <button style={{"marginTop": "6px", "padding": "15px 18px", "borderRadius": "24px", "border": "2px solid #262626", "background": "linear-gradient(135deg, #fef3c7 0%, #fff8e7 100%)", "color": "#1f2937", "fontWeight": "800", "cursor": "pointer", "boxShadow": "0 12px 20px rgba(38,38,38,0.12)", "fontSize": "16px"}} onClick={lambda { submit_task(); }}>
                             Add to plan
                         </button>
+                        {if error_message != "" {
+                            <div style={{"padding": "12px 14px", "borderRadius": "18px", "border": "1px solid rgba(220,38,38,0.22)", "background": "rgba(254,242,242,0.92)", "color": "#b91c1c", "fontSize": "13px", "fontWeight": "700"}}>
+                                {error_message}
+                            </div>
+                        }}
                     </div>
                 </section>
 
@@ -187,8 +198,27 @@ def:pub page -> JsxPage {
                                 <div style={{"fontSize": "10px", "letterSpacing": "0.2em", "textTransform": "uppercase", "color": "#6c7f8b", "fontWeight": "700"}}>Inbox board</div>
                                 <h2 style={{"margin": "6px 0 0 0", "fontSize": "24px", "fontWeight": "800", "color": "#1f3645"}}>Today’s plan</h2>
                             </div>
-                            <span style={{"fontSize": "12px", "color": "#5f7482", "padding": "8px 12px", "borderRadius": "999px", "background": "#f7fbff", "border": "1.5px solid rgba(38,38,38,0.12)", "fontWeight": "700"}}>{str(len(tasks))} items</span>
+                            <span style={{"fontSize": "12px", "color": "#5f7482", "padding": "8px 12px", "borderRadius": "999px", "background": "#f7fbff", "border": "1.5px solid rgba(38,38,38,0.12)", "fontWeight": "700"}}>{str(summary["pending"])} active</span>
                         </div>
+
+                        {if next_task is not None {
+                            <div style={{"marginBottom": "14px", "padding": "18px", "borderRadius": "26px", "border": "2px solid #27323a", "background": "linear-gradient(135deg, rgba(254,243,199,0.82) 0%, rgba(255,250,235,0.96) 100%)", "boxShadow": "4px 4px 0 rgba(38,38,38,0.08)"}}>
+                                <div style={{"fontSize": "10px", "letterSpacing": "0.18em", "textTransform": "uppercase", "color": "#8a5f10", "fontWeight": "700"}}>Recommended next</div>
+                                <div style={{"marginTop": "8px", "fontSize": "21px", "fontWeight": "800", "color": "#1f3645"}}>{str(next_task["title"])}</div>
+                                <div style={{"marginTop": "6px", "display": "flex", "gap": "8px", "flexWrap": "wrap"}}>
+                                    <span style={{"padding": "5px 10px", "borderRadius": "999px", "background": "rgba(231,241,251,0.95)", "fontSize": "11px", "fontWeight": "700", "color": "#2a5d86", "border": "1px solid rgba(38,38,38,0.08)"}}>{str(next_task["priority"]).capitalize()} priority</span>
+                                    {if str(next_task["due"]) != "" {
+                                        <span style={{"padding": "5px 10px", "borderRadius": "999px", "background": "rgba(239,250,244,0.95)", "fontSize": "11px", "fontWeight": "700", "color": "#2f7850", "border": "1px solid rgba(38,38,38,0.08)"}}>Due {next_task["due"] as str}</span>
+                                    } else {
+                                        <span style={{"padding": "5px 10px", "borderRadius": "999px", "background": "rgba(239,250,244,0.95)", "fontSize": "11px", "fontWeight": "700", "color": "#2f7850", "border": "1px solid rgba(38,38,38,0.08)"}}>No due date</span>
+                                    }}
+                                </div>
+                            </div>
+                        } elif len(tasks) > 0 {
+                            <div style={{"marginBottom": "14px", "padding": "18px", "borderRadius": "26px", "border": "2px dashed rgba(38,38,38,0.18)", "background": "rgba(248,250,252,0.72)", "color": "#51616d", "fontSize": "15px", "fontWeight": "700"}}>
+                                All active tasks are complete. Completed cards are still shown below.
+                            </div>
+                        }}
 
                         {if len(tasks) == 0 {
                             <div style={{"display": "grid", "gap": "16px", "padding": "18px 6px 6px"}}>

@@ -2,3 +2,8 @@
 node_modules/
 server.log
 dist/
+.DS_Store
+.env
+.env.*
+.planner_state.json
+.planner_test_state.json

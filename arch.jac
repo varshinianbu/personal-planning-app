@@ -28,10 +28,19 @@ impl import cli.commands {
 impl import core {
     planner_service --> web.main | web.pages.index | mobile.main | cli.main {
         add_task,
+        calculate_focus_score,
         clear_completed,
+        complete_task,
+        get_active_tasks,
+        get_completed_tasks,
+        get_next_task,
         get_summary,
+        get_task,
         get_tasks,
+        get_recommended_tasks,
         remove_task,
+        reopen_task,
+        validate_task_input,
         toggle_task,
     }
     ai --> cli.commands.score | core.scoring_service { optional_review }
@@ -784,6 +793,3 @@ impl import core.source {
     }
 }
 
-impl import core.site.planner {
-    PlannerHome --> web.pages.index { PlannerHome }
-}
